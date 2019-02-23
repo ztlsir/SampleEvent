@@ -83,9 +83,9 @@ namespace Test.LightInject
             var container = new ServiceContainer();
             Mock<IDoSomething> mockDoSomething = new Mock<IDoSomething>();
             container.Register<IDoSomething>(factory => mockDoSomething.Object);
-            IEventBus eventBus = new EventBus(this.GenerateEventHandleProvider(container));
             var msgEvent = new MsgEvent() { Message = "你好" };
 
+            IEventBus eventBus = new EventBus(this.GenerateEventHandleProvider(container));
             await eventBus.Publish(msgEvent);
 
             mockDoSomething.Verify(obj => obj.JustDoIt(It.Is<string>(text => text == msgEvent.Message)), Times.Once);
@@ -97,15 +97,54 @@ namespace Test.LightInject
             var container = new ServiceContainer();
             Mock<IDoSomething> mockDoSomething = new Mock<IDoSomething>();
             container.Register<IDoSomething>(factory => mockDoSomething.Object);
-            IEventBus eventBus = new EventBus(this.GenerateEventHandleProvider(container));
             var msgEvent = new MsgEvent() { Message = "你好" };
             var lostEvent = new LostEvent() { LostInfo = "迷失" };
 
+            IEventBus eventBus = new EventBus(this.GenerateEventHandleProvider(container));
             await eventBus.Publish(msgEvent);
             await eventBus.Publish(lostEvent);
 
             mockDoSomething.Verify(obj => obj.JustDoIt(It.Is<string>(text => text == msgEvent.Message)), Times.Once);
             mockDoSomething.Verify(obj => obj.JustDoIt(It.Is<string>(text => text == lostEvent.LostInfo)), Times.Exactly(2));
+        }
+
+        [TestMethod]
+        public async Task Test_event_publish_succeed()
+        {
+            var container = new ServiceContainer();
+            container.Register<IDoSomething, DoSomething>();
+            //mock and register IEventHandler<MsgEvent>
+            Mock<IEventHandler<MsgEvent>> mockDoSomething = new Mock<IEventHandler<MsgEvent>>();
+            container.Register<IEventHandler<MsgEvent>>(factory => mockDoSomething.Object);
+            var testMsgEvent = new MsgEvent() { Message = "test_msg" };
+
+            IEventBus eventBus = new EventBus(this.GenerateEventHandleProvider(container));
+            await eventBus.Publish(testMsgEvent);
+
+            mockDoSomething.Verify(obj => obj.Handle(It.Is<MsgEvent>(msgEvent => msgEvent.Message == testMsgEvent.Message)), Times.Once);
+        }
+
+        [TestMethod]
+        public async Task Test_multi_event_publish_succeed()
+        {
+            var container = new ServiceContainer();
+            container.Register<IDoSomething, DoSomething>();
+            //mock and register IEventHandler<MsgEvent>
+            Mock<IEventHandler<MsgEvent>> mockMsgEventHandler = new Mock<IEventHandler<MsgEvent>>();
+            container.Register<IEventHandler<MsgEvent>>(factory => mockMsgEventHandler.Object);
+            //mock and register IEventHandler<LostEvent>
+            Mock<IEventHandler<LostEvent>> mockLostEventHandler = new Mock<IEventHandler<LostEvent>>();
+            container.Register<IEventHandler<LostEvent>>(factory => mockLostEventHandler.Object);
+            var testMsgEvent = new MsgEvent() { Message = "test_msg" };
+            var testLostEvent = new LostEvent() { LostInfo = "test_LostInfo" };
+
+            IEventBus eventBus = new EventBus(this.GenerateEventHandleProvider(container));
+            await eventBus.Publish(testMsgEvent);
+            await eventBus.Publish(testLostEvent);
+            await eventBus.Publish(testLostEvent);
+
+            mockMsgEventHandler.Verify(obj => obj.Handle(It.Is<MsgEvent>(msgEvent => msgEvent.Message == testMsgEvent.Message)), Times.Once);
+            mockLostEventHandler.Verify(obj => obj.Handle(It.Is<LostEvent>(lostEvent => lostEvent.LostInfo == testLostEvent.LostInfo)), Times.Exactly(2));
         }
 
         private EventHandleProvider GenerateEventHandleProvider(ServiceContainer container = null)
