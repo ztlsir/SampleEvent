@@ -10,19 +10,41 @@ namespace Test
     {
         public class MsgEvent : ISampleEvent
         {
-            public string Msg { get; set; }
+            private static readonly object LockObject = new object();
+
+            public string Message { get; set; }
+
+            public int GetMessageExecuteTimes { get; private set; }
+
+            public string GetMessage()
+            {
+                this.GetMessageExecuteTimes++;
+
+                return Message;
+            }
         }
 
         public class LostEvent : ISampleEvent
         {
+            private static readonly object LockObject = new object();
+
             public string LostInfo { get; set; }
+
+            public int GetLostInfoExecuteTimes { get; private set; }
+
+            public string GetLostInfo()
+            {
+                this.GetLostInfoExecuteTimes++;
+
+                return LostInfo;
+            }
         }
 
         public class MsgEventHandler : IEventHandler<MsgEvent>
         {
             public async Task Handle(MsgEvent msgEvent)
             {
-                await Task.Run(() => { Debug.WriteLine("MsgEventHandler：" + msgEvent.Msg); });
+                await Task.Run(() => { Debug.WriteLine("MsgEventHandler：" + msgEvent.GetMessage()); });
             }
         }
 
@@ -30,7 +52,7 @@ namespace Test
         {
             public async Task Handle(MsgEvent msgEvent)
             {
-                await Task.Run(() => { Debug.WriteLine("TalkEventHandler：" + msgEvent.Msg); });
+                await Task.Run(() => { Debug.WriteLine("TalkEventHandler：" + msgEvent.GetMessage()); });
             }
         }
 
@@ -38,7 +60,7 @@ namespace Test
         {
             public async Task Handle(LostEvent msgEvent)
             {
-                await Task.Run(() => { Debug.WriteLine("LostEventHandler：" + msgEvent.LostInfo); });
+                await Task.Run(() => { Debug.WriteLine("LostEventHandler：" + msgEvent.GetLostInfo()); });
             }
         }
 
@@ -46,18 +68,33 @@ namespace Test
         {
             public async Task Handle(LostEvent msgEvent)
             {
-                await Task.Run(() => { Debug.WriteLine("LostManEventHandler：" + msgEvent.LostInfo); });
+                await Task.Run(() => { Debug.WriteLine("LostManEventHandler：" + msgEvent.GetLostInfo()); });
             }
         }
 
         [TestMethod]
-        public void Test_EventHandleProvider()
+        public async Task Test_publish_MsgEvent()
         {
             IEventBus eventBus = new EventBus(new EventHandleProvider());
+            var msgEvent = new MsgEvent() { Message = "你好" };
 
-            eventBus.Publish(new MsgEvent() { Msg = "你好" });
+            await eventBus.Publish(msgEvent);
 
-            eventBus.Publish(new LostEvent() { LostInfo = "迷失" });
+            Assert.AreEqual(2, msgEvent.GetMessageExecuteTimes);
+        }
+
+        [TestMethod]
+        public async Task Test_publish_MsgEvent_and_LostEvent()
+        {
+            IEventBus eventBus = new EventBus(new EventHandleProvider());
+            var msgEvent = new MsgEvent() { Message = "你好" };
+            var lostEvent = new LostEvent() { LostInfo = "迷失" };
+
+            await eventBus.Publish(msgEvent);
+            await eventBus.Publish(lostEvent);
+
+            Assert.AreEqual(2, msgEvent.GetMessageExecuteTimes);
+            Assert.AreEqual(2, lostEvent.GetLostInfoExecuteTimes);
         }
     }
 }

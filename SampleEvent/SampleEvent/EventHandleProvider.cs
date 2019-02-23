@@ -16,38 +16,34 @@ namespace SampleEvent
                 .CurrentDomain
                 .GetAssemblies()
                 .SelectMany(s => s.GetTypes())
-                .Where(type => GetEventHandlerTypeFromInterfaces(type) != null)
+                .Where(type => GetEventHandlerInterfaceType(type) != null)
                 .ToList()
-                .ForEach(type =>
+                .ForEach(eventHandlerType =>
                     _eventHandlers.Value
-                    .GetOrAdd(GetEventHandlerTypeFromInterfaces(type), valueOfType => new ConcurrentDictionary<Type, object>())
-                    .GetOrAdd(type, valueOfType => Activator.CreateInstance(type)));
+                    .GetOrAdd(GetEventHandlerInterfaceType(eventHandlerType), valueOfType => new ConcurrentDictionary<Type, object>())
+                    .GetOrAdd(eventHandlerType, valueOfType => Activator.CreateInstance(eventHandlerType)));
         }
 
         public override IEnumerable<IEventHandler<TSampleEvent>> GetEventHandlers<TSampleEvent>()
         {
             return _eventHandlers.Value
                 .GetOrAdd(typeof(IEventHandler<TSampleEvent>), new ConcurrentDictionary<Type, object>())
-                .Values
-                .ToList()
-                .Select(s => (IEventHandler<TSampleEvent>)s);
+                .Select(s => (IEventHandler<TSampleEvent>)s.Value);
         }
 
         public override IEnumerable<Func<TSampleEvent, Task>> GetHandles<TSampleEvent>()
         {
             return _eventHandlers.Value
                 .GetOrAdd(typeof(IEventHandler<TSampleEvent>), new ConcurrentDictionary<Type, object>())
-                .Values
-                .ToList()
-                .Select<object, Func<TSampleEvent, Task>>(s => ((IEventHandler<TSampleEvent>)s).Handle);
+                .Select<KeyValuePair<Type, object>, Func<TSampleEvent, Task>>(s => ((IEventHandler<TSampleEvent>)s.Value).Handle);
         }
 
-        private Type GetEventHandlerTypeFromInterfaces(Type type)
+        private Type GetEventHandlerInterfaceType(Type eventHandlerType)
         {
-            return type
+            return eventHandlerType
                 .GetInterfaces()
-                .FirstOrDefault(iType => iType.IsGenericType
-                                         && iType.GetGenericTypeDefinition() == typeof(IEventHandler<>));
+                .FirstOrDefault(interfaceType => interfaceType.IsGenericType
+                                         && interfaceType.GetGenericTypeDefinition() == typeof(IEventHandler<>));
         }
     }
 }
