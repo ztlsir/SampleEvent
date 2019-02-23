@@ -14,11 +14,16 @@ namespace Test
             public string Msg { get; set; }
         }
 
+        public class LostEvent : ISampleEvent
+        {
+            public string LostInfo { get; set; }
+        }
+
         public class MsgEventHandler : IEventHandler<MsgEvent>
         {
             public void Handle(MsgEvent msgEvent)
             {
-                Debug.Write("MsgEventHandler：" + msgEvent.Msg);
+                Debug.WriteLine("MsgEventHandler：" + msgEvent.Msg);
             }
         }
 
@@ -26,7 +31,23 @@ namespace Test
         {
             public void Handle(MsgEvent msgEvent)
             {
-                Debug.Write("TalkEventHandler：" + msgEvent.Msg);
+                Debug.WriteLine("TalkEventHandler：" + msgEvent.Msg);
+            }
+        }
+
+        public class LostEventHandler : IEventHandler<LostEvent>
+        {
+            public void Handle(LostEvent msgEvent)
+            {
+                Debug.WriteLine("LostEventHandler：" + msgEvent.LostInfo);
+            }
+        }
+
+        public class LostManEventHandler : IEventHandler<LostEvent>
+        {
+            public void Handle(LostEvent msgEvent)
+            {
+                Debug.WriteLine("LostManEventHandler：" + msgEvent.LostInfo);
             }
         }
 
@@ -36,6 +57,8 @@ namespace Test
             IEventBus eventBus = new EventBus(new EventHandleProvider());
 
             eventBus.Publish(new MsgEvent() { Msg = "你好" });
+
+            eventBus.Publish(new LostEvent() { LostInfo = "迷失" });
         }
     }
 }
