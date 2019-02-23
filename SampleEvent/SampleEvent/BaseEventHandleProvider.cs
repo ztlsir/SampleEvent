@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
+using System.Threading.Tasks;
 
 namespace SampleEvent
 {
@@ -14,6 +13,6 @@ namespace SampleEvent
 
         public abstract void RegisterEvents();
         public abstract IEnumerable<IEventHandler<TSampleEvent>> GetEventHandlers<TSampleEvent>() where TSampleEvent : ISampleEvent;
-        public abstract IEnumerable<Action<TSampleEvent>> GetHandles<TSampleEvent>() where TSampleEvent : ISampleEvent;
+        public abstract IEnumerable<Func<TSampleEvent, Task>> GetHandles<TSampleEvent>() where TSampleEvent : ISampleEvent;
     }
 }

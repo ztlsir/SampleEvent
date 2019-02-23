@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
 using System.Linq;
-using System.Reflection;
+using System.Threading.Tasks;
 
 namespace SampleEvent
 {
@@ -35,13 +33,13 @@ namespace SampleEvent
                 .Select(s => (IEventHandler<TSampleEvent>)s);
         }
 
-        public override IEnumerable<Action<TSampleEvent>> GetHandles<TSampleEvent>()
+        public override IEnumerable<Func<TSampleEvent, Task>> GetHandles<TSampleEvent>()
         {
             return _eventHandlers.Value
                 .GetOrAdd(typeof(IEventHandler<TSampleEvent>), new ConcurrentDictionary<Type, object>())
                 .Values
                 .ToList()
-                .Select<object, Action<TSampleEvent>>(s => ((IEventHandler<TSampleEvent>)s).Handle);
+                .Select<object, Func<TSampleEvent, Task>>(s => ((IEventHandler<TSampleEvent>)s).Handle);
         }
 
         private Type GetEventHandlerTypeFromInterfaces(Type type)

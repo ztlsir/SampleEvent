@@ -1,8 +1,7 @@
-﻿using System;
-using System.Diagnostics;
-using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SampleEvent;
+using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace Test
 {
@@ -21,33 +20,33 @@ namespace Test
 
         public class MsgEventHandler : IEventHandler<MsgEvent>
         {
-            public void Handle(MsgEvent msgEvent)
+            public async Task Handle(MsgEvent msgEvent)
             {
-                Debug.WriteLine("MsgEventHandler：" + msgEvent.Msg);
+                await Task.Run(() => { Debug.WriteLine("MsgEventHandler：" + msgEvent.Msg); });
             }
         }
 
         public class TalkEventHandler : IEventHandler<MsgEvent>
         {
-            public void Handle(MsgEvent msgEvent)
+            public async Task Handle(MsgEvent msgEvent)
             {
-                Debug.WriteLine("TalkEventHandler：" + msgEvent.Msg);
+                await Task.Run(() => { Debug.WriteLine("TalkEventHandler：" + msgEvent.Msg); });
             }
         }
 
         public class LostEventHandler : IEventHandler<LostEvent>
         {
-            public void Handle(LostEvent msgEvent)
+            public async Task Handle(LostEvent msgEvent)
             {
-                Debug.WriteLine("LostEventHandler：" + msgEvent.LostInfo);
+                await Task.Run(() => { Debug.WriteLine("LostEventHandler：" + msgEvent.LostInfo); });
             }
         }
 
         public class LostManEventHandler : IEventHandler<LostEvent>
         {
-            public void Handle(LostEvent msgEvent)
+            public async Task Handle(LostEvent msgEvent)
             {
-                Debug.WriteLine("LostManEventHandler：" + msgEvent.LostInfo);
+                await Task.Run(() => { Debug.WriteLine("LostManEventHandler：" + msgEvent.LostInfo); });
             }
         }
 

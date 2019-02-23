@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 namespace SampleEvent
 {
     public interface IEventBus
     {
-        void Publish<TSampleEvent>(TSampleEvent sampleEvent) where TSampleEvent : ISampleEvent;
+        Task Publish<TSampleEvent>(TSampleEvent sampleEvent) where TSampleEvent : ISampleEvent;
     }
 }

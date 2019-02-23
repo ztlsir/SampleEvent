@@ -1,21 +1,23 @@
-﻿namespace SampleEvent
+﻿using System.Threading.Tasks;
+
+namespace SampleEvent
 {
     public class EventBus : IEventBus
     {
-        private IEventHandleProvider eventHandleProvider { get; set; }
+        private IEventHandleProvider EventHandleProvider { get;}
 
         public EventBus(IEventHandleProvider eventHandleProvider)
         {
-            this.eventHandleProvider = eventHandleProvider;
+            this.EventHandleProvider = eventHandleProvider;
         }
 
-        public void Publish<TSampleEvent>(TSampleEvent sampleEvent) where TSampleEvent : ISampleEvent
+        public async Task Publish<TSampleEvent>(TSampleEvent sampleEvent) where TSampleEvent : ISampleEvent
         {
-            var handles = this.eventHandleProvider.GetHandles<TSampleEvent>();
+            var handles = this.EventHandleProvider.GetHandles<TSampleEvent>();
 
             foreach (var handle in handles)
             {
-                handle(sampleEvent);
+                await handle(sampleEvent);
             }
         }
     }
