@@ -3,9 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26730.16
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleEvent", "SampleEvent\SampleEvent.csproj", "{8FACD451-EC98-4175-BAF2-B993472434BE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SampleEvent", "SampleEvent\SampleEvent.csproj", "{8FACD451-EC98-4175-BAF2-B993472434BE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test", "Test\Test.csproj", "{C6692511-90E3-47A6-999B-A3F2F4958FEE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleEvent.LightInject", "SampleEvent.LightInject\SampleEvent.LightInject.csproj", "{67576765-51EA-469F-A139-DEE7C7EE20D5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{C6692511-90E3-47A6-999B-A3F2F4958FEE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C6692511-90E3-47A6-999B-A3F2F4958FEE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C6692511-90E3-47A6-999B-A3F2F4958FEE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{67576765-51EA-469F-A139-DEE7C7EE20D5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{67576765-51EA-469F-A139-DEE7C7EE20D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{67576765-51EA-469F-A139-DEE7C7EE20D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{67576765-51EA-469F-A139-DEE7C7EE20D5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

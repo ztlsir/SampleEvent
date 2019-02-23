@@ -6,7 +6,7 @@ namespace SampleEvent
 {
     public interface IEventHandleProvider
     {
-        void RegisterEvents();
+        void RegisterEventHandlers();
         IEnumerable<IEventHandler<TSampleEvent>> GetEventHandlers<TSampleEvent>() where TSampleEvent : ISampleEvent;
         IEnumerable<Func<TSampleEvent, Task>> GetHandles<TSampleEvent>() where TSampleEvent : ISampleEvent;
     }

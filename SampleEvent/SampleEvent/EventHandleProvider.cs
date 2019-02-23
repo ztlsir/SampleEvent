@@ -2,38 +2,40 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace SampleEvent
 {
-    public class EventHandleProvider : BaseEventHandleProvider
+    public class EventHandleProvider : IEventHandleProvider
     {
-        private readonly Lazy<ConcurrentDictionary<Type, ConcurrentDictionary<Type, object>>> _eventHandlers = new Lazy<ConcurrentDictionary<Type, ConcurrentDictionary<Type, object>>>();
+        private readonly Lazy<ConcurrentDictionary<Type, ConcurrentDictionary<Type, object>>> lazyEventHandlers = new Lazy<ConcurrentDictionary<Type, ConcurrentDictionary<Type, object>>>();
 
-        public override void RegisterEvents()
+        public EventHandleProvider(params object[] eventHandlers)
         {
-            AppDomain
-                .CurrentDomain
-                .GetAssemblies()
-                .SelectMany(s => s.GetTypes())
-                .Where(type => GetEventHandlerInterfaceType(type) != null)
+            eventHandlers
+                .Where(eventHandler => GetEventHandlerInterfaceType(eventHandler.GetType()) != null)
                 .ToList()
-                .ForEach(eventHandlerType =>
-                    _eventHandlers.Value
-                    .GetOrAdd(GetEventHandlerInterfaceType(eventHandlerType), valueOfType => new ConcurrentDictionary<Type, object>())
-                    .GetOrAdd(eventHandlerType, valueOfType => Activator.CreateInstance(eventHandlerType)));
+                .ForEach(eventHandler =>
+                    this.lazyEventHandlers.Value
+                        .GetOrAdd(GetEventHandlerInterfaceType(eventHandler.GetType()), valueOfType => new ConcurrentDictionary<Type, object>())
+                        .GetOrAdd(eventHandler.GetType(), eventHandler));
         }
 
-        public override IEnumerable<IEventHandler<TSampleEvent>> GetEventHandlers<TSampleEvent>()
+        public void RegisterEventHandlers()
         {
-            return _eventHandlers.Value
+        }
+
+        public IEnumerable<IEventHandler<TSampleEvent>> GetEventHandlers<TSampleEvent>() where TSampleEvent : ISampleEvent
+        {
+            return lazyEventHandlers.Value
                 .GetOrAdd(typeof(IEventHandler<TSampleEvent>), new ConcurrentDictionary<Type, object>())
                 .Select(s => (IEventHandler<TSampleEvent>)s.Value);
         }
 
-        public override IEnumerable<Func<TSampleEvent, Task>> GetHandles<TSampleEvent>()
+        public IEnumerable<Func<TSampleEvent, Task>> GetHandles<TSampleEvent>() where TSampleEvent : ISampleEvent
         {
-            return _eventHandlers.Value
+            return lazyEventHandlers.Value
                 .GetOrAdd(typeof(IEventHandler<TSampleEvent>), new ConcurrentDictionary<Type, object>())
                 .Select<KeyValuePair<Type, object>, Func<TSampleEvent, Task>>(s => ((IEventHandler<TSampleEvent>)s.Value).Handle);
         }

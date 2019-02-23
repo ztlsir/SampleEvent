@@ -5,12 +5,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="BaseEventHandleProvider.cs" />
-    <Compile Remove="NewEventHandleProvider.cs" />
+    <PackageReference Include="LightInject" Version="5.4.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.CSharp" Version="4.5.0" />
+    <ProjectReference Include="..\SampleEvent\SampleEvent.csproj" />
   </ItemGroup>
 
 </Project>
