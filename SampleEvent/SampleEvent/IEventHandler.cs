@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SampleEvent
 {
-    public interface IEventHandler<TSampleEvent> where TSampleEvent : ISampleEvent
+    public interface IEventHandler<in TSampleEvent> where TSampleEvent : ISampleEvent
     {
         void Handle(TSampleEvent sampleEvent);
     }
