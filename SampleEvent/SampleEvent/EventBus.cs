@@ -11,12 +11,14 @@ namespace SampleEvent
             this.EventHandleProvider = eventHandleProvider;
         }
 
-        public async Task Publish<TSampleEvent>(TSampleEvent sampleEvent) where TSampleEvent : ISampleEvent
+        public async Task<IEventBus> Publish<TSampleEvent>(TSampleEvent sampleEvent) where TSampleEvent : ISampleEvent
         {
             foreach (var handle in this.EventHandleProvider.GetHandles<TSampleEvent>())
             {
                 await handle(sampleEvent).ConfigureAwait(false);
             }
+
+            return this;
         }
     }
 }

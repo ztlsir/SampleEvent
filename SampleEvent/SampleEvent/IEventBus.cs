@@ -4,6 +4,6 @@ namespace SampleEvent
 {
     public interface IEventBus
     {
-        Task Publish<TSampleEvent>(TSampleEvent sampleEvent) where TSampleEvent : ISampleEvent;
+        Task<IEventBus> Publish<TSampleEvent>(TSampleEvent sampleEvent) where TSampleEvent : ISampleEvent;
     }
 }
