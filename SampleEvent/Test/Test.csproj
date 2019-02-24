@@ -71,6 +71,7 @@
     <Compile Include="LightInject\EventHandleProviderTest.cs" />
     <Compile Include="EventHandleProviderTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TaskExtention.cs" />
     <Compile Include="TestClass\DoSomeThing.cs" />
     <Compile Include="TestClass\IDoSomething.cs" />
     <Compile Include="TestClass\LostEvent.cs" />

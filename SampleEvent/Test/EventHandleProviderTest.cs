@@ -89,10 +89,10 @@ namespace Test
             var testMsgEvent = new MsgEvent() { Message = "test_msg" };
             var testLostEvent = new LostEvent() { LostInfo = "test_LostInfo" };
 
-            IEventBus eventBus = new EventBus(new EventHandleProvider(mockMsgEventHandler.Object, mockLostEventHandler.Object));
-            await eventBus.Publish(testMsgEvent);
-            await eventBus.Publish(testLostEvent);
-            await eventBus.Publish(testLostEvent);
+            await new EventBus(new EventHandleProvider(mockMsgEventHandler.Object, mockLostEventHandler.Object))
+                .Publish(testMsgEvent)
+                .DoAsync(eventBus => eventBus.Publish(testLostEvent))
+                .DoAsync(eventBus => eventBus.Publish(testLostEvent));
 
             mockMsgEventHandler.Verify(obj => obj.Handle(It.Is<MsgEvent>(msgEvent => msgEvent.Message == testMsgEvent.Message)), Times.Once);
             mockLostEventHandler.Verify(obj => obj.Handle(It.Is<LostEvent>(lostEvent => lostEvent.LostInfo == testLostEvent.LostInfo)), Times.Exactly(2));
