@@ -22,10 +22,6 @@ namespace SampleEvent
                         .GetOrAdd(eventHandler.GetType(), eventHandler));
         }
 
-        public void RegisterEventHandlers()
-        {
-        }
-
         public IEnumerable<IEventHandler<TSampleEvent>> GetEventHandlers<TSampleEvent>() where TSampleEvent : ISampleEvent
         {
             return lazyEventHandlers.Value

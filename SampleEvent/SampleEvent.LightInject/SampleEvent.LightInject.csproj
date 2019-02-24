@@ -5,6 +5,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="SampleEventConfig.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="LightInject" Version="5.4.0" />
   </ItemGroup>
 

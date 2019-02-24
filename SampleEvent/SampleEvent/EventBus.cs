@@ -4,7 +4,7 @@ namespace SampleEvent
 {
     public class EventBus : IEventBus
     {
-        private IEventHandleProvider EventHandleProvider { get;}
+        private IEventHandleProvider EventHandleProvider { get; }
 
         public EventBus(IEventHandleProvider eventHandleProvider)
         {

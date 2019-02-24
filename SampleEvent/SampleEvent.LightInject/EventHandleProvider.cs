@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 namespace SampleEvent.LightInject
@@ -10,21 +11,20 @@ namespace SampleEvent.LightInject
     public class EventHandleProvider : IEventHandleProvider
     {
         private IServiceContainer ServiceContainer { get; }
-        private IEnumerable<Assembly> Assemblies { get; }
 
         public EventHandleProvider(IServiceContainer serviceContainer, params Assembly[] assemblies)
+        : this(serviceContainer, () => new PerContainerLifetime(), assemblies)
         {
-            this.ServiceContainer = serviceContainer;
-            this.Assemblies = assemblies;
-
-            RegisterEventHandlers();
         }
 
-        public void RegisterEventHandlers()
+        public EventHandleProvider(IServiceContainer serviceContainer,
+            Func<ILifetime> lifetimeFactory, params Assembly[] assemblies)
         {
-            foreach (var assembly in Assemblies)
+            this.ServiceContainer = serviceContainer;
+
+            foreach (var assembly in assemblies)
             {
-                this.ServiceContainer.RegisterAssembly(assembly, (interfaceType, eventHandlerType) =>
+                serviceContainer.RegisterAssembly(assembly, lifetimeFactory, (interfaceType, eventHandlerType) =>
                     interfaceType.IsConstructedGenericType && interfaceType.GetGenericTypeDefinition() == typeof(IEventHandler<>));
             }
         }
