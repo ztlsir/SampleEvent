@@ -22,11 +22,7 @@ namespace SampleEvent.LightInject
         {
             this.ServiceContainer = serviceContainer;
 
-            foreach (var assembly in assemblies)
-            {
-                serviceContainer.RegisterAssembly(assembly, lifetimeFactory, (interfaceType, eventHandlerType) =>
-                    interfaceType.IsConstructedGenericType && interfaceType.GetGenericTypeDefinition() == typeof(IEventHandler<>));
-            }
+            this.RegisterEventHandlersFromAssemblies(serviceContainer, lifetimeFactory, assemblies);
         }
 
         public IEnumerable<IEventHandler<TSampleEvent>> GetEventHandlers<TSampleEvent>() where TSampleEvent : ISampleEvent
@@ -37,9 +33,19 @@ namespace SampleEvent.LightInject
 
         public IEnumerable<Func<TSampleEvent, Task>> GetHandles<TSampleEvent>() where TSampleEvent : ISampleEvent
         {
-            return this.ServiceContainer
-                 .GetAllInstances<IEventHandler<TSampleEvent>>()
+            return this.GetEventHandlers<TSampleEvent>()
                  .Select(s => (Func<TSampleEvent, Task>)s.Handle);
+        }
+
+        private void RegisterEventHandlersFromAssemblies(IServiceContainer serviceContainer, Func<ILifetime> lifetimeFactory,
+            Assembly[] assemblies)
+        {
+            foreach (var assembly in assemblies)
+            {
+                serviceContainer.RegisterAssembly(assembly, lifetimeFactory, (interfaceType, eventHandlerType) =>
+                    interfaceType.IsConstructedGenericType &&
+                    interfaceType.GetGenericTypeDefinition() == typeof(IEventHandler<>));
+            }
         }
     }
 }

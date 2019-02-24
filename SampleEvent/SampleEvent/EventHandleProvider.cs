@@ -9,7 +9,7 @@ namespace SampleEvent
 {
     public class EventHandleProvider : IEventHandleProvider
     {
-        private readonly Lazy<ConcurrentDictionary<Type, ConcurrentDictionary<Type, object>>> lazyEventHandlers = new Lazy<ConcurrentDictionary<Type, ConcurrentDictionary<Type, object>>>();
+        private readonly Lazy<ConcurrentDictionary<Type, ConcurrentDictionary<Type, object>>> lazyOfMultipleEventHandlersDictionary = new Lazy<ConcurrentDictionary<Type, ConcurrentDictionary<Type, object>>>();
 
         public EventHandleProvider(params object[] eventHandlers)
         {
@@ -17,22 +17,20 @@ namespace SampleEvent
                 .Where(eventHandler => GetEventHandlerInterfaceType(eventHandler.GetType()) != null)
                 .ToList()
                 .ForEach(eventHandler =>
-                    this.lazyEventHandlers.Value
+                    this.lazyOfMultipleEventHandlersDictionary.Value
                         .GetOrAdd(GetEventHandlerInterfaceType(eventHandler.GetType()), valueOfType => new ConcurrentDictionary<Type, object>())
                         .GetOrAdd(eventHandler.GetType(), eventHandler));
         }
 
         public IEnumerable<IEventHandler<TSampleEvent>> GetEventHandlers<TSampleEvent>() where TSampleEvent : ISampleEvent
         {
-            return lazyEventHandlers.Value
-                .GetOrAdd(typeof(IEventHandler<TSampleEvent>), new ConcurrentDictionary<Type, object>())
+            return this.GetSimilarEventHandlersDictionary<TSampleEvent>()
                 .Select(s => (IEventHandler<TSampleEvent>)s.Value);
         }
 
         public IEnumerable<Func<TSampleEvent, Task>> GetHandles<TSampleEvent>() where TSampleEvent : ISampleEvent
         {
-            return lazyEventHandlers.Value
-                .GetOrAdd(typeof(IEventHandler<TSampleEvent>), new ConcurrentDictionary<Type, object>())
+            return this.GetSimilarEventHandlersDictionary<TSampleEvent>()
                 .Select<KeyValuePair<Type, object>, Func<TSampleEvent, Task>>(s => ((IEventHandler<TSampleEvent>)s.Value).Handle);
         }
 
@@ -41,7 +39,13 @@ namespace SampleEvent
             return eventHandlerType
                 .GetInterfaces()
                 .FirstOrDefault(interfaceType => interfaceType.IsGenericType
-                                         && interfaceType.GetGenericTypeDefinition() == typeof(IEventHandler<>));
+                                                 && interfaceType.GetGenericTypeDefinition() == typeof(IEventHandler<>));
+        }
+
+        private ConcurrentDictionary<Type, object> GetSimilarEventHandlersDictionary<TSampleEvent>() where TSampleEvent : ISampleEvent
+        {
+            return lazyOfMultipleEventHandlersDictionary.Value
+                .GetOrAdd(typeof(IEventHandler<TSampleEvent>), new ConcurrentDictionary<Type, object>());
         }
     }
 }
