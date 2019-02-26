@@ -4,6 +4,7 @@ using SampleEvent;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using Moq;
+using SampleEvent.LightInject;
 using Test.TestClass;
 using EventHandleProvider = SampleEvent.LightInject.EventHandleProvider;
 
@@ -84,6 +85,8 @@ namespace Test.LightInject
             Mock<IDoSomething> mockDoSomething = new Mock<IDoSomething>();
             container.Register<IDoSomething>(factory => mockDoSomething.Object);
             var msgEvent = new MsgEvent() { Message = "你好" };
+            SampleEventIOCFactory.RegisterEventHandlersFromAssemblies(container, () => new PerContainerLifetime(),
+                this.GetType().Assembly);
 
             IEventBus eventBus = new EventBus(this.GenerateEventHandleProvider(container));
             await eventBus.Publish(msgEvent);
@@ -99,6 +102,8 @@ namespace Test.LightInject
             container.Register<IDoSomething>(factory => mockDoSomething.Object);
             var msgEvent = new MsgEvent() { Message = "你好" };
             var lostEvent = new LostEvent() { LostInfo = "迷失" };
+            SampleEventIOCFactory.RegisterEventHandlersFromAssemblies(container, () => new PerContainerLifetime(),
+                this.GetType().Assembly);
 
             IEventBus eventBus = new EventBus(this.GenerateEventHandleProvider(container));
             await eventBus.Publish(msgEvent);
@@ -154,7 +159,7 @@ namespace Test.LightInject
                 container = new ServiceContainer();
             }
 
-            return new EventHandleProvider(container, this.GetType().Assembly);
+            return new EventHandleProvider(container);
         }
     }
 }

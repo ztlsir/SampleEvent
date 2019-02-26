@@ -22,6 +22,17 @@ namespace SampleEvent
                         .GetOrAdd(eventHandler.GetType(), eventHandler));
         }
 
+        public EventHandleProvider(Func<object[]> eventHandlersFactory)
+        {
+            eventHandlersFactory()
+                .Where(eventHandler => GetEventHandlerInterfaceType(eventHandler.GetType()) != null)
+                .ToList()
+                .ForEach(eventHandler =>
+                    this.lazyOfMultipleEventHandlersDictionary.Value
+                        .GetOrAdd(GetEventHandlerInterfaceType(eventHandler.GetType()), valueOfType => new ConcurrentDictionary<Type, object>())
+                        .GetOrAdd(eventHandler.GetType(), eventHandler));
+        }
+
         public IEnumerable<IEventHandler<TSampleEvent>> GetEventHandlers<TSampleEvent>() where TSampleEvent : ISampleEvent
         {
             return this.GetSimilarEventHandlersDictionary<TSampleEvent>()
